@@ -1,3 +1,5 @@
+import { getCookie } from "./cookies";
+
 const baseURL = "http://localhost:5000";
 
 export const apiClient = async (url, method, body = null, tokenName = "") => {
