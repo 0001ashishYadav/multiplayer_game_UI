@@ -49,3 +49,6 @@ apiClient.resetPassword = (token, payload) =>
 
 apiClient.forgotPassword = (payload) =>
   apiClient("/users/forgotPassword", "PATCH", payload);
+
+apiClient.uploadProfileImage = (payload) =>
+  apiClient("/users/profile/image", "PATCH", payload);
