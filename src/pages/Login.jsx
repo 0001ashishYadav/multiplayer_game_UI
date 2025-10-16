@@ -1,7 +1,11 @@
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 import { apiClient } from "../utils/apiClient";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import { setCookie } from "../utils/cookies";
+import { useGlobalContext } from "../context/globalContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,12 +13,43 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
+  const { isLogin, setIsLogin, setUserProfile } = useGlobalContext();
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const data = await apiClient.login({ email, password });
       console.log(data);
+
+      const tokenExpiresIn = data.expiresIn;
+      const currentMilies = Date.now();
+
+      dayjs.extend(duration);
+
+      function convertExpiryToSeconds(expiryString) {
+        const unit = expiryString.slice(-1).toUpperCase(); // e.g. "H"
+        const value = parseInt(expiryString.slice(0, -1), 10); // e.g. 1
+
+        const expiryDuration = dayjs
+          .duration(value, unit === "H" ? "hour" : unit)
+          .asSeconds();
+        return expiryDuration;
+      }
+
+      setCookie("token", data.token, convertExpiryToSeconds(tokenExpiresIn));
+
+      setIsLogin(true);
+
+      setUserProfile(data);
+
+      navigate(from, { replace: true });
+
+      console.log(currentMilies, convertExpiryToSeconds(tokenExpiresIn) * 1000);
     } catch (error) {
       console.log(error);
     }
