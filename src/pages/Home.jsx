@@ -17,11 +17,29 @@ import {
   Trophy,
   Zap,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
+import { useGlobalContext } from "../context/globalContext";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const { isLogin } = useGlobalContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // const chooseRoute = isLogin ? "/profile" : "/login";
+
+  const checkLogin = () => {
+    if (!isLogin) {
+      // Redirect programmatically
+      navigate("/login", { state: { from: location }, replace: true });
+    } else {
+      // Redirect to profile if logged in
+      navigate("/profile");
+    }
+  };
 
   const categories = [
     { id: "all", name: "All Games", icon: Gamepad2 },
@@ -192,7 +210,10 @@ const Home = () => {
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
               </button>
-              <button className="p-2 text-gray-400 hover:text-white transition-colors">
+              <button
+                onClick={checkLogin}
+                className="p-2 text-gray-400 hover:text-white transition-colors"
+              >
                 <User className="w-5 h-5" />
               </button>
               <button
